@@ -82,6 +82,8 @@ public class BinaryPatternExtractor {
             for (Entity entityOne : entities) {
                 for (Entity entityTwo : entities) {
 
+                    if (entityOne.equals(entityTwo)) continue;
+
                     // produce patterns for each entity pair and add to result list
                     List<PatternTuple> tuples = producePatternsForEntityPair(graph, entityOne, entityTwo);
                     if (tuples != null) allTuples.addAll(tuples);
@@ -114,7 +116,7 @@ public class BinaryPatternExtractor {
         DepWord dependent = null;
         String dependencyType = null;
 
-        List<String> backlistedDependencies = Lists.newArrayList("npadvmod", "advcl");
+        List<String> backlistedDependencies = Lists.newArrayList("npadvmod", "advcl", "root");
         //  backlistedDependencies = Lists.newArrayList();
 
         try {
@@ -229,7 +231,8 @@ public class BinaryPatternExtractor {
                 Set<DepWord> subgraphTokens = Sets.newHashSet(possibleSubgraph);
                 subgraphTokens.add(e1head);
                 subgraphTokens.add(e2head);
-                if (!isConnectedSubgraph(dependencyGraph, subgraphTokens)) continue;
+                //if (!isConnectedSubgraph(dependencyGraph, subgraphTokens)) continue;
+                if (!isConnectedSubgraph2(dependencyGraph, subgraphTokens)) continue;
 
 
                 SortedSet<Map.Entry<DepWord, Double>> entries = sortGraphTokensByPosition(subgraphTokens);
@@ -297,6 +300,43 @@ public class BinaryPatternExtractor {
         }
 
         return dataBag;
+    }
+
+    private boolean isConnectedSubgraph2(UndirectedGraph<DepWord, DependencyEdge> dependencyGraph, Set<DepWord> subgraphTokens) {
+
+
+        List<DepLink> links = Lists.newArrayList();
+        // if not connected, skip subgraph
+        for (DepWord token : subgraphTokens) {
+
+            boolean tokenHasAtLeastOneConnection = false;
+
+            List<DepLink> incomingLinks = token.getIncomingLinks();
+            for (DepLink incomingLink : incomingLinks) {
+                if (subgraphTokens.contains(incomingLink.getOriginWord())) {
+                    links.add(incomingLink);
+                    tokenHasAtLeastOneConnection = true;
+                    break;
+                }
+            }
+
+            if (!tokenHasAtLeastOneConnection)
+                for (DepLink outgoingLink : token.getOutgoingLinks()) {
+                    if (subgraphTokens.contains(outgoingLink.getTargetWord())) {
+                        tokenHasAtLeastOneConnection = true;
+                        links.add(outgoingLink);
+                        break;
+                    }
+                }
+
+            if (!tokenHasAtLeastOneConnection) {
+                return false;
+            }
+        }
+
+        //  System.out.println(subgraphTokens);
+        //System.out.println("TRUE" + links);
+        return isConnectedSubgraph(dependencyGraph, subgraphTokens);
     }
 
     private boolean isConnectedSubgraph(UndirectedGraph<DepWord, DependencyEdge> dependencyGraph, Set<DepWord> subgraphTokens) {
