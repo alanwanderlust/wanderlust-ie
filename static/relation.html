@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html style="height:100%">
+<head>
+	<title>Schn&auml;pper Exploratory Relation Extractor</title>
+	<!-- <script src="offline.js"></script>
+  <link href="offline.css" rel="stylesheet"> -->
+	<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+	<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
+	<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+	<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+	<script src="relation.js"></script>
+	<script src="common.js"></script>
+	<script src="tour.js"></script>
+	<link href="style.css" rel="stylesheet">
+</head>
+<body style="height:100%">
+	<div id="overlay" class="hidden">
+		<div style="position: fixed; left: 0; top: 0; height: 100%; width: 100%; background-color: #000; opacity: 0.5; z-index: 9990;"></div>
+		<div class="alert alert-info" style="text-align: center; font-size: 14pt; height: 230px; width: 400px; position: fixed; top: 100%; left: 100%; margin-left: -450px; margin-top: -280px; z-index: 9999; box-shadow: 0px 0px 30px #000;">
+			<div style="float: left; font-size: 32pt;">
+				<span class="glyphicon glyphicon-info-sign"></span>
+			</div>
+			<div id="tour-texts">
+				<div id="tour-text-0" style="margin-top: 15px;">
+					Need help using this tool?<br><br><br>
+					<button class="btn btn-primary" onclick="tourStep++; takeStep();">Take a Tour</button>
+					<button class="btn btn-default" onclick="$('#overlay').addClass('hidden');">Dismiss</button>
+				</div>
+				<div id="tour-text-1" class="hidden" style="margin-top: 0px; font-size: 12pt; padding: 5px;">
+					With this tool you can extract relations from a large corpus of text.<br><br>
+					Let's say as an example you want to know which software supports which file format.
+				</div>
+				<div id="tour-text-2" class="hidden" style="font-size: 12pt; padding: 5px;">
+					First, you can specify the type of the subject (i.e. software) and the object (i.e. file format).<br><br>
+					You can use the search bar to look for types that fit.
+				</div>
+				<div id="tour-text-3" class="hidden" style="font-size: 12pt; padding: 5px;">
+					Let's search for software in the X-Type search field and see if there are any patterns that match.
+				</div>
+				<div id="tour-text-4" class="hidden" style="font-size: 12pt; padding: 5px;">
+					It looks like <b>computer.software</b> fits the criteria.<br><br>
+					You can select and deselect a type by double clicking on it.
+				</div>
+				<div id="tour-text-5" class="hidden" style="font-size: 12pt; padding: 5px;">
+					Let's try the same with the object of our extractor.<br><br>
+					The freebase type <b>computer.file_format</b> fits best.
+				</div>
+				<div id="tour-text-6" class="hidden" style="font-size: 12pt; padding: 5px;">
+					You can see that the output section always shows the current state of the extractor.<br><br>
+					In this case it shows all relations between two entities of type <b>computer.software</b> and <b>computer.file_format</b>
+				</div>
+				<div id="tour-text-7" class="hidden" style="font-size: 12pt; padding: 5px;">
+					The patterns section shows all the patterns that match the current extractor.<br><br>
+					For example <b>[X] support [Y]</b> looks like a fitting pattern for our query.
+				</div>
+				<div id="tour-text-8" class="hidden" style="font-size: 12pt; padding: 5px;">
+					By clicking on a pattern, you can see some example sentences that match that pattern as well als the restrictions of the types.
+				</div>
+				<div id="tour-text-9" class="hidden" style="font-size: 12pt; padding: 5px;">
+					By double clicking on a pattern you can activate it.<br><br>
+					Ther result now only shows entities that match the selected patterns.
+				</div>
+				<div id="tour-text-10" class="hidden" style="font-size: 12pt; padding: 5px;">
+					<br><br>
+					Try it out on your own!<br><br>
+					<button class="btn btn-success" onclick="tourStep++; takeStep();">Got it!</button>
+				</div>
+			</div>
+			<br>
+			<div class="hidden" id="tour-buttons">
+				<button style="float: right;" class="btn btn-primary" onclick="tourStep++; takeStep();">Next</button>
+				<button style="float: left;" class="btn btn-default" onclick="tourStep--; takeStep();">Previous</button>
+			</div>
+		</div>
+	</div>
+	<div style="height:100%; margin-left: 10px; margin-right: 10px;">
+		<nav class="navbar navbar-default navbar-fixed-top" style="height:5%;" role="navigation">
+			<div style="height:7px"></div>
+			<div style="float: left; margin-left: 20px;">
+				<div class="btn-group">
+					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+				    Examples <span class="caret"></span>
+				  </button>
+				  <ul class="dropdown-menu" role="menu">
+				    <li><a href="?patterns=[%22[X]%20drive.v%20[Y]%22,%22[X]%20have.v%20car.n%20[Y]%22,%22[X]%20own.v%20car.n%20[Y]%22,%22[X]%20own.v%20[Y]%22]&subjects=[%22celebrities.celebrity%22]&objects=[%22automotive.model%22]"><span class="text-success">Celebrity</span> drives <span class="text-danger">Car</span></a></li>
+				    <li><a href="?patterns=[%22[X]%20publication.n%20of%20[Y]%22,%22[X]%20published.v%20by%20[Y]%22,%22[X]%20journal.n%20of%20[Y]%22]&subjects=[%22book.journal%22]&objects=[%22organization.organization%22]"><span class="text-success">Organization</span> publishes <span class="text-danger">Journal</span></a></li>
+				    <li><a href="?patterns=%5B%22%5BX%5D%20support.v%20%5BY%5D%22,%22open.v%20%5BY%5D%20file.n%20in%20%5BX%5D%22,%22%5BX%5D%20play.v%20%5BY%5D%20file.n%22,%22%5BX%5D%20read.v%20%5BY%5D%20file.n%22%5D&subjects=%5B%22computer.software%22%5D&objects=%5B%22computer.file_format%22%5D"><span class="text-success">Software</span> supports <span class="text-danger">File Format</span></a></li>
+				  </ul>
+				</div>
+				<button type="button" class="btn btn-primary" onclick="newExtractor();">New extractor</button>
+			</div>
+			<div style="float: right; margin-right: 20px;">
+				<button type="button" class="btn btn-success" onclick="openSave();">Save</button>
+			</div>
+			<p class="text-center" style="font-size: 30px;">
+				<img src="schnaepper.png" style="height: 45px; margin-top: -4px; margin-bottom: 10px;">
+				<span style="font-variant: small-caps;">Schn&auml;pper</span>
+				<sup><span data-toggle="modal" data-target="#help" class="glyphicon glyphicon-question-sign text-primary" style="font-size: 16pt; cursor: pointer;"></span></sup>
+				<span style="display: inline-block; width: 100px;"></span>
+				<!-- <img src="tub.png" style="height: 40px; margin-top: -11px;"> -->
+			</p>
+		</nav>
+
+		<div style="height:8%;"></div>
+
+		<div id="content" style="height:92%; overflow: hidden;">
+			<!--
+			<p style="font-size: 60px; margin-bottom: 50px;" class="text-center" id="sentence">Einstein is a tributary of Berlin</p>
+			-->
+			<div class="row" style="height:52%;">
+				<div class="col-md-3" style="height:100%">
+					<div class="panel panel-success" style="height:100%; overflow-y: hidden;">
+					  <div class="panel-heading">
+					  	<div class="loader hidden" style="float: right;">
+					    	<img src="subject-loader.gif">
+					    </div>
+					    <h3 class="panel-title">
+					    	<div style=" margin-top: -9px; margin-bottom: -9px;">
+					    		<div class="btn-group">
+										<button id="xtype-button" type="button"  style="background-color: #dff0d8; border-color: #d6e9c6; color: #468847; font-size: 16px;" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+									    X-Type <span class="caret"></span>
+									  </button>
+									  <ul id="xtype-menu" class="dropdown-menu pull-left" role="menu">
+									    <li id="subject-entry"><a style="cursor: pointer;" onclick="toggleXType(this);">Subject</a></li>
+									    <li id="subject-extractor-entry"><a style="cursor: pointer;" onclick="toggleXType(this);">Extractor</a></li>
+									  </ul>
+									</div>
+					    	</div>
+					    </h3>
+					  </div>
+					  <div id="xtype-body" class="panel-body" style="font-size: 12px; height: inherit; padding-bottom: 90px; padding-top: 5px;">
+					    <div class="input-group">
+					      <input onkeydown="if(event.keyCode == 13) searchSubject();" id="subject-searcher" type="text" class="form-control" placeholder="Search for x-types...">
+					      <span class="input-group-btn">
+					        <button class="btn btn-default" type="button" onclick="searchSubject();">Search</button>
+					      </span>
+					  	</div>
+					  	<div id="subjects" style="margin-top: 5px; height: inherit; overflow-y: auto; padding-right: 15px;">
+					  	</div>
+					  </div>
+					  <div id="subject-body" class="panel-body hidden">
+					  	<label>Search for a freebase entity:</label>
+					  	<input id="subject-search" style="background-color: #dff0d8; border-color: #d6e9c6; font-size: 16px; text-align: center;" onkeydown="if(event.keyCode == 13) searchFreebaseSubject();" type="text" class="form-control" placeholder="Subject">
+					  	<div id="subject-results" style="margin-top: 5px; height: inherit; overflow-y: auto; padding-right: 15px;"></div>
+					  </div>
+					  <div id="subject-extractor-body" style="height: inherit; padding-bottom: 205px;" class="panel-body hidden">
+					  	<div class="alert alert-success" id="selected-subject-extractor" style="padding: 5px;">
+					  		<label style="color: #333;">Currently selected:</label><br><p class="text-center lead"><b>Nothing</b><p class="text-center" style="font-size: 11px; margin-top: -5px;">&nbsp;</p></p>
+					  	</div>
+					  	<label>Search for an extractor:</label>
+					  	<input id="subject-extractor-search" style="/* background-color: #dff0d8; border-color: #d6e9c6; */ font-size: 16px; text-align: center;" onkeydown="if(event.keyCode == 13) searchSubjectExtractor();" type="text" class="form-control" placeholder="Extractor">
+					  	<div style="margin-top: 5px; height: inherit; overflow-y: auto; padding-right: 15px; height: 100%;">
+					  		<div class="panel-group" id="subject-extractor-results"></div>
+					  	</div>
+					  </div>
+					</div>
+				</div>
+				<div class="col-md-6" style="height:100%;">
+					<div class="panel panel-default" style="height:100%; overflow-y: hidden;">
+					  <div class="panel-heading">
+					  	<div class="loader hidden" style="float: right;">
+					    	<img src="pattern-loader.gif">
+					    </div>
+					    <h3 class="panel-title">Patterns</h3>
+					  </div>
+					  <div class="panel-body" style="height: inherit; padding-bottom: 80px; padding-top: 5px;">
+					  	<div class="input-group">
+					      <input onkeydown="if(event.keyCode == 13) searchPattern();" id="pattern-searcher" type="text" class="form-control" placeholder="Search for patterns...">
+					      <span class="input-group-btn">
+					        <button class="btn btn-default" type="button" onclick="searchPattern();">Search</button>
+					      </span>
+					  	</div>
+					  	<div id="patterns" style="margin-top: 5px; height: inherit; overflow-y: auto; padding-right: 15px;">
+
+					  	</div>
+					  </div>
+					</div>
+				</div>
+				<div class="col-md-3" style="height:100%">
+					<div class="panel panel-danger" style="height:100%; overflow-y: hidden;">
+					  <div class="panel-heading">
+					  	<div class="loader hidden" style="float: right;">
+					    	<img src="object-loader.gif">
+					    </div>
+					    <h3 class="panel-title">
+					    	<div style=" margin-top: -9px; margin-bottom: -9px;">
+					    		<div class="btn-group">
+										<button id="ytype-button" type="button"  style="background-color: #f2dede; border-color: #eed3d7; color: #b94a48; font-size: 16px;" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+									    Y-Type <span class="caret"></span>
+									  </button>
+									  <ul id="ytype-menu" class="dropdown-menu pull-left" role="menu">
+									    <li id="object-entry"><a style="cursor: pointer;" onclick="toggleYType(this);">Object</a></li>
+									    <li id="object-extractor-entry"><a style="cursor: pointer;" onclick="toggleYType(this);">Extractor</a></li>
+									  </ul>
+									</div>
+					    	</div>
+					    </h3>
+					  </div>
+					  <div id="ytype-body" class="panel-body" style="font-size: 12px; height: inherit; padding-bottom: 90px; padding-top: 5px;">
+					  	<div class="input-group">
+					      <input onkeydown="if(event.keyCode == 13) searchObject();" id="object-searcher" type="text" class="form-control" placeholder="Search for y-types...">
+					      <span class="input-group-btn">
+					        <button class="btn btn-default" type="button" onclick="searchObject();">Search</button>
+					      </span>
+					  	</div>
+					  	<div id="objects" style="margin-top: 5px; height: inherit; overflow-y: auto; padding-right: 15px;">
+					  	</div>
+					  </div>
+					  <div id="object-body" class="panel-body hidden">
+					  	<label>Search for a freebase entity:</label>
+					  	<input id="object-search" style="background-color: #f2dede; border-color: #eed3d7; font-size: 16px; text-align: center;" onkeydown="if(event.keyCode == 13) searchFreebaseObject();" type="text" class="form-control" placeholder="Object">
+							<div id="object-results" style="margin-top: 5px; height: inherit; overflow-y: auto; padding-right: 15px;"></div>
+					  </div>
+					  <div id="object-extractor-body" style="height: inherit; padding-bottom: 205px;" class="panel-body hidden">
+					  	<div class="alert alert-danger" id="selected-object-extractor" style="padding: 5px;">
+					  		<label style="color: #333;">Currently selected:</label><br><p class="text-center lead"><b>Nothing</b><p class="text-center" style="font-size: 11px; margin-top: -5px;">&nbsp;</p></p>
+					  	</div>
+					  	<label>Search for an extractor:</label>
+					  	<input id="object-extractor-search" style="font-size: 16px; text-align: center;" onkeydown="if(event.keyCode == 13) searchObjectExtractor();" type="text" class="form-control" placeholder="Extractor">
+					  	<div style="margin-top: 5px; height: inherit; overflow-y: auto; padding-right: 15px; height: 100%;">
+					  		<div class="panel-group" id="object-extractor-results"></div>
+					  	</div>
+					  </div>
+					</div>
+				</div>
+			</div>
+
+			<div style="height:2%"></div>
+
+			<div class="panel panel-primary" style="height:45%; overflow-y: hidden; position: relative;">
+			  <div class="panel-heading">
+			  	<div class="loader hidden" style="float: right;">
+			    	<img src="output-loader.gif">
+			    </div>
+			    <h3 class="panel-title">Output</h3>
+			  </div>
+			  <div class="panel-body" style="height: 100%; margin-top: -80px; padding-top: 80px;">
+			  	<div style="overflow-y: auto; height: inherit; padding-right: 15px;">
+				    <table class="table table-striped">
+				    	<thead>
+				    		<tr>
+				    			<th>Subject</th>
+				    			<th>Object</th>
+				    			<th>Example</th>
+				    			<th style="width: 30px"><span class="glyphicon glyphicon-info-sign"></span></th>
+				    		</tr>
+				    	</thead>
+				    	<tbody id="results">
+				    	</tbody>
+				    </table>
+			    </div>
+			  </div>
+			  <div class="panel-footer">
+			  	<div style="float: left;">
+			  		<a href="#" onclick="permaLink();" class="download"><span class="glyphicon glyphicon-link"></span>&nbsp;Permalink</a>
+			  	</div>
+			  	<div class="text-right">
+			  		<a href="#" onclick="download_result();" class="download"><span class="glyphicon glyphicon-download"></span>&nbsp;Download this result</a>
+			  	</div>
+			  </div>
+			</div>
+		</div>
+
+		<!-- Modal -->
+		<div class="modal fade" id="output-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		        <h4 class="modal-title" id="myModalLabel">Info</h4>
+		      </div>
+		      <div class="modal-body" id="output-info-body">
+		        ...
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+
+		<!-- Modal -->
+		<div class="modal fade" id="save-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		        <h4 class="modal-title" id="myModalLabel">Save</h4>
+		      </div>
+		      <div class="modal-body">
+		      	<p>Saving the current extractor makes the entities of the result set usable in other extractors. Please choose an appropriate name and description for your extractor:</p>
+		      	<label for="save-name">Give your new relation a name:</label>
+		      	<input type="text" id="save-name" placeholder="Name" class="form-control"/>
+		      	<br/>
+		      	<label>Name the x-entities, y-entities and the relation of your extractor:</label>
+		      	<input type="text" id="save-xname" placeholder="Name for x-entities" class="form-control" style="margin-bottom: 3px;"/>
+		      	<!-- <label for="save-relation">Name of the relation between the two entity types</label> -->
+		      	<input type="text" id="save-relation" placeholder="Name of the relation" class="form-control" style="margin-bottom: 3px;"/>
+		      	<!-- <label for="save-yname">Name the y-entities of your extractor:</label> -->
+		      	<input type="text" id="save-yname" placeholder="Name for y-entities" class="form-control"/>
+		      	<br/>
+		      	<label for="save-description">Description:</label>
+		      	<input type="text" id="save-description" placeholder="Description" class="form-control"/>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		        <button type="button" class="btn btn-success" data-dismiss="modal" onclick="saveExtractor();">Save</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+
+		<!-- Modal -->
+		<div class="modal fade" id="help" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content" style="left: -182px; width: 940px;">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		        <h4 class="modal-title" id="myModalLabel">About</h4>
+		      </div>
+		      <!-- <div class="modal-body" style="height: 550px;" id="output-info-body">
+
+		      	<div id="carousel-example-generic" style="height: 500px; width: 900px;" class="carousel slide" data-ride="carousel">
+						  <ol class="carousel-indicators">
+						    <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
+						    <li data-target="#carousel-example-generic" data-slide-to="1"></li>
+						    <li data-target="#carousel-example-generic" data-slide-to="2"></li>
+						    <li data-target="#carousel-example-generic" data-slide-to="3"></li>
+						    <li data-target="#carousel-example-generic" data-slide-to="4"></li>
+						    <li data-target="#carousel-example-generic" data-slide-to="5"></li>
+						    <li data-target="#carousel-example-generic" data-slide-to="6"></li>
+						    <li data-target="#carousel-example-generic" data-slide-to="7"></li>
+						    <li data-target="#carousel-example-generic" data-slide-to="8"></li>
+						  </ol>
+
+						  <div class="carousel-inner">
+						    <div class="item active" style="color: #333;">
+						      <img src="img1.png" >
+						      <div>
+						        Search for a relation of your intereset (for example <code>be president of</code>) and try using infinitives!
+						      </div>
+						    </div>
+						    <div class="item" style="color: #333;">
+						      <img src="img2.png" >
+						      <div>
+						        You can either select patterns directly from the autocomplete-box or just hit the <code>Search</code> button to browse through the relevant patterns. You can click on <code>more</code> on the bottom of the list to display more results.
+						      </div>
+						    </div>
+						    <div class="item" style="color: #333;">
+						      <img src="img3.png" >
+						      <div>
+						        By simply clicking on a pattern in the list, a number of example sentences is shown. The subject and object of the sentence are marken in red and green respectively.
+						      </div>
+						    </div>
+						    <div class="item" style="color: #333;">
+						      <img src="img4.png" >
+						      <div>
+						        By double clicking on a pattern, the pattern will become <em>active</em>. The system will now start fetch relevant patterns, subject- and object-types (as indicated by the loading icons: <img src="pattern-loader.gif">).
+						      </div>
+						    </div>
+						    <div class="item" style="color: #333;">
+						      <img src="img5.png" >
+						      <div>
+						        From the list of relevant subject- and object-types, a specific type can be activated by simply clicking on it.
+						      </div>
+						    </div>
+						    <div class="item" style="color: #333;">
+						      <img src="img6.png" >
+						      <div>
+						        Alternatively, the types can be searched just like the patterns.
+						      </div>
+						    </div>
+						    <div class="item" style="color: #333;">
+						      <img src="img7.png" >
+						      <div>
+						        The output section at the bottom of the page will automatically change according to your input. It displays the subject, the object and an example sentence.
+						      </div>
+						    </div>
+						    <div class="item" style="color: #333;">
+						      <img src="img8.png" >
+						      <div>
+						        By clicking on one of the magnifying glasses in the output table, you can inspect a specific output element.
+						      </div>
+						    </div>
+						    <div class="item" style="color: #333;">
+						      <img src="img9.png" >
+						      <div>
+						        By clicking on the download link at the bottom of the output section, you can download your result.
+						      </div>
+						    </div>
+						  </div>
+
+						  <a class="left carousel-control" href="#carousel-example-generic" data-slide="prev">
+						    <span class="glyphicon glyphicon-chevron-left"></span>
+						  </a>
+						  <a class="right carousel-control" href="#carousel-example-generic" data-slide="next">
+						    <span class="glyphicon glyphicon-chevron-right"></span>
+						  </a>
+						</div>
+					</div> -->
+					<div class="modal-body" id="output-info-body">
+						<div style="float: right;">
+							<img src="schnaepper.png" style="height: 200px;">
+						</div>
+
+						<p>
+							<span style="font-variant: small-caps;">Schn&auml;pper</span> is an Exploratory Relation Extraction tool that lets non-experts create relation extractors with an incremental, data guided workflow. For a tour on how to use this tool click <a style="cursor: pointer;" data-dismiss="modal" onclick="$('#overlay').removeClass('hidden');">here</a>.
+						</p>
+
+						<h4>Legal</h4>
+							<p>
+								We assume no liability on the contents of external links. The content of linked websites is exclusively down to the persons or organizations running these websites.
+							</p>
+							<div class="row">
+								<div class="col-md-6">
+									<h4>Project speaker</h4>
+				        	<p>
+								   	Alan Akbik, M.Sc. <br>
+										FG DIMA <br>
+										TU Berlin, Fakultät IV <br>
+										Raum EN 701 <br>
+										Einsteinufer 17 <br>
+										10587 Berlin <br>
+										P: +49 30 314 29004 <br>
+										alan [dot] akbik [&auml;t] tu-berlin [dot] de
+									 </p>
+									</div>
+									<div class="col-md-6">
+										<h4>Research Assistant</h4>
+										<p>
+											Thilo Michael, B.Sc. <br>
+											thilo [&auml;t] thilo [dot] co
+ 										</p>
+									</div>
+							</div>
+					</div>
+
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		        <button style="float:left;" type="button" class="btn btn-primary" onclick="$('#overlay').removeClass('hidden');" data-dismiss="modal">Take a Tour</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+	</div>
+	<div id="info-box" style="position: absolute; left: 50%; z-index: 100000; top: 80%; display: none;">
+		<div class="alert" style="position: relative; left: -50%;">
+			<span class="glyphicon glyphicon-exclamation-sign"></span> <span id="info-content"></span>
+		</div>
+	</div>
+</body>
+</html>

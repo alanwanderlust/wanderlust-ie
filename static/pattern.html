@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Syntactic Patternreader</title>
+	<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+	<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
+	<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+	<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+	<script src="main.js"></script>
+	<link href="style.css" rel="stylesheet">
+</head>
+<body>
+	<div class="container">
+		<nav class="navbar navbar-default navbar-fixed-top" style="height:100px;" role="navigation">
+			<div style="height:20px"></div>
+			<p class="text-center" style="font-size: 40px;">
+				Syntactic Patternreader
+				<sup><span class="glyphicon glyphicon-question-sign text-primary" style="font-size: 16pt; cursor: pointer;"></span></sup>
+			</p>
+		</nav>
+		<div style="height:150px"></div>
+
+		<div id="loading">
+			<h1 class="text-center">Please wait while your request is being processed...</h1>
+			<p class="text-center">
+				<img src="loader.gif">
+			</p>
+		</div>
+
+		<div id="content" class="hidden">
+			<p style="font-size: 60px; margin-bottom: 50px;" class="text-center" id="sentence">Einstein is a tributary of Berlin</p>
+			<div class="row">
+				<div class="col-md-3">
+					<div class="panel panel-success">
+					  <div class="panel-heading">
+					  	<div class="loader hidden" style="float: right;">
+					    	<img src="subject-loader.gif">
+					    </div>
+					    <h3 class="panel-title">Subjects</h3>
+					  </div>
+					  <div class="panel-body" style="max-height: 700px; overflow: scroll; font-size: 10px;" id="subjects">
+					    
+					  </div>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="panel panel-default">
+					  <div class="panel-heading">
+					  	<div class="loader hidden" style="float: right;">
+					    	<img src="pattern-loader.gif">
+					    </div>
+					    <h3 class="panel-title">Patterns</h3>
+					  </div>
+					  <div class="panel-body" id="patterns" style="max-height: 700px; overflow: scroll;">
+					  	
+					  </div>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="panel panel-danger">
+					  <div class="panel-heading">
+					  	<div class="loader hidden" style="float: right;">
+					    	<img src="object-loader.gif">
+					    </div>
+					    <h3 class="panel-title">Objects</h3>
+					  </div>
+					  <div class="panel-body" id="objects" style="max-height: 700px; overflow: scroll; font-size: 10px;">
+
+					  </div>
+					</div>
+				</div>
+			</div>
+			<div class="panel panel-primary">
+			  <div class="panel-heading">
+			  	<div class="loader hidden" style="float: right;">
+			    	<img src="output-loader.gif">
+			    </div>
+			    <h3 class="panel-title">Output</h3>
+			  </div>
+			  <div class="panel-body" style="max-height: 700px; overflow: scroll; font-size: 10px;">
+			    <table class="table table-striped">
+			    	<thead>
+			    		<tr>
+			    			<th>Subject</th>
+			    			<th>Pattern</th>
+			    			<th>Object</th>
+			    			<th style="width: 30px"><span class="glyphicon glyphicon-info-sign"></span></th>
+			    		</tr>
+			    	</thead>
+			    	<tbody id="results">
+			    	</tbody>
+			    </table>
+			  </div>
+			  <div class="panel-footer">
+			  	<div class="text-right">
+			  		<a href="#" onclick="download_result();" class="download"><span class="glyphicon glyphicon-download"></span>&nbsp;Download this result</a>
+			  	</div>
+			  </div>
+			</div>
+		</div>
+
+		<!-- Modal -->
+		<div class="modal fade" id="output-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		        <h4 class="modal-title" id="myModalLabel">Info</h4>
+		      </div>
+		      <div class="modal-body" id="output-info-body">
+		        ...
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+
+	</div>
+</body>
+</html>

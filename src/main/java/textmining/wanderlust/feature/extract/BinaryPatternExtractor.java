@@ -86,13 +86,19 @@ public class BinaryPatternExtractor {
 
                     // produce patterns for each entity pair and add to result list
                     List<PatternTuple> tuples = producePatternsForEntityPair(graph, entityOne, entityTwo);
-                    if (tuples != null) allTuples.addAll(tuples);
+                    if (tuples != null) {
+                        allTuples.addAll(tuples);
+                    }
                 }
             }
 
 
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        for (PatternTuple allTuple : allTuples) {
+            allTuple.setOrigin(dependencyParse.getSentence());
         }
 
         return allTuples;
@@ -228,9 +234,16 @@ public class BinaryPatternExtractor {
                 if (possibleSubgraph.size() > this.maxTokensInSubtree) continue;
 
                 // using the tokens, we create a subgraph of the dependency dependencyGraph and check if it is connected
+
                 Set<DepWord> subgraphTokens = Sets.newHashSet(possibleSubgraph);
+                Set<DepWord> subgraphTokensWithFullEntity = Sets.newHashSet(possibleSubgraph);
+
                 subgraphTokens.add(e1head);
                 subgraphTokens.add(e2head);
+
+                subgraphTokensWithFullEntity.addAll(entityOne.getTokens());
+                subgraphTokensWithFullEntity.addAll(entityTwo.getTokens());
+
                 //if (!isConnectedSubgraph(dependencyGraph, subgraphTokens)) continue;
                 if (!isConnectedSubgraph2(dependencyGraph, subgraphTokens)) continue;
 
@@ -244,7 +257,7 @@ public class BinaryPatternExtractor {
 
 
                 // now look at optional tokens
-                Set<DepWord> optionalConnectedTokens = determineOptionalConnectedTokens(subgraphTokens, Lists.newArrayList("amod", "nn"));
+                Set<DepWord> optionalConnectedTokens = determineOptionalConnectedTokens(subgraphTokensWithFullEntity, Lists.newArrayList("amod", "nn", "dobj"));
 
                 for (DepWord optionalConnectedToken : optionalConnectedTokens) {
 

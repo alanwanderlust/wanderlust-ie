@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html style="height:100%">
+<head>
+	<title>Exploratory Knowledge Base Creation</title>
+	<!-- <script src="offline.js"></script>
+  <link href="offline.css" rel="stylesheet"> -->
+	<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+	<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
+	<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+	<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+	<script src="graph.js"></script>
+	<script src="arbor.js"></script>
+	<script src="arbor-tween.js"></script>
+	<link href="style.css" rel="stylesheet">
+</head>
+<body>
+	<div style="height:100%; margin-left: 10px; margin-right: 10px;">
+		<nav class="navbar navbar-default navbar-fixed-top" style="height:5%;" role="navigation">
+			<div style="height:7px"></div>
+			<div style="float: left; margin-left: 20px;">
+				<button type="button" class="btn btn-primary" onclick="location.href='entity.html';">New entity</button>
+			</div>
+			<div style="float: right; margin-right: 20px;">
+				<button type="button" class="btn btn-primary" onclick="location.href='relation.html';">New relation</button>
+			</div>
+			<p class="text-center" style="font-size: 30px;">
+				Exploratory Knowledge Base Creation
+			</p>
+		</nav>
+		<div class="row" style="margin-top: 100px;">
+			<div class="col-md-8" id="graph">
+				<canvas style="top: 1px; left: 1px;" height="600" width="900" id="viewport"></canvas>
+			</div>
+			<div class="col-md-4">
+				<div class="panel panel-default" style="height:100%; overflow-y: hidden;">
+					  <div class="panel-heading">
+					    <h3 class="panel-title" id="selected-name">Info</h3>
+					  </div>
+					  <div class="panel-body" id="selected-content" style="height: inherit; padding-bottom: 30px; padding-top: 5px;">
+					  	<small style="text-align: center; display: block; margin-top: 30px;">Information about the currently selected node is displayed here.</small>
+					  </div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="navbar navbar-default" style="width: 100%; text-align: center; position:fixed; top: 100%; margin-top: -50px; height: 50px; padding-top: 8px;">
+		<a href="extractor/download/kb_rdf.xml" class="btn btn-primary"><span class="glyphicon glyphicon-download"></span> Download as RDF</a>
+	</div>
+</body>

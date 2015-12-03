@@ -1,0 +1,5 @@
+#Config file for patternreader ui
+port=8088
+pattern.source=C:\\\\Users\\IBM_ADMIN\\Documents\\Data\\LocalIndex\\extracted_features\\
+lucene=C:\\\\Users\\IBM_ADMIN\\Documents\\Data\\lucene\\index\\
+

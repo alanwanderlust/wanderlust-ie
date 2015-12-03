@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html style="height:100%">
+<head>
+  <title>Exploratory Entity Extractor</title>
+  <!-- <script src="offline.js"></script>
+  <link href="offline.css" rel="stylesheet"> -->
+  <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+  <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
+  <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+  <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+  <script src="entity.js"></script>
+  <script src="common.js"></script>
+  <link href="style.css" rel="stylesheet">
+</head>
+<body style="height:100%">
+  <div style="height:100%; margin-left: 10px; margin-right: 10px;">
+    <nav class="navbar navbar-default navbar-fixed-top" style="height:5%;" role="navigation">
+      <div style="height:7px"></div>
+      <div style="float: left; position: absolute; margin-left: 20px;">
+        <button type="button" class="btn btn-primary" onclick="newExtractor();">New extractor</button>
+      </div>
+      <div style="float: right; margin-right: 20px;">
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#save-dialog">Save</button>
+      </div>
+      <p class="text-center" style="font-size: 30px;">
+        Exploratory Entity Extractor
+        <sup><span data-toggle="modal" data-target="#help" class="glyphicon glyphicon-question-sign text-primary" style="font-size: 16pt; cursor: pointer;"></span></sup>
+      </p>
+    </nav>
+
+    <div style="height:8%;"></div>
+
+    <div id="content" style="height:92%; overflow: hidden;">
+      <div class="row" style="height:52%;">
+        <div class="col-md-5" style="height:100%">
+          <div class="panel panel-success" style="height:100%; overflow-y: hidden;">
+            <div class="panel-heading">
+              <div class="loader hidden" style="float: right;">
+                <img src="subject-loader.gif">
+              </div>
+              <h3 class="panel-title">
+                <div style=" margin-top: -9px; margin-bottom: -9px;">
+                  <div class="btn-group">
+                    <button id="type-button" type="button"  style="background-color: #dff0d8; border-color: #d6e9c6; color: #468847; font-size: 16px;" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                      Entity type <span class="caret"></span>
+                    </button>
+                    <ul id="type-menu" class="dropdown-menu pull-left" role="menu">
+                      <li id="entity-entry"><a style="cursor: pointer;" onclick="toggleType(this);">Entity</a></li>
+                      <li id="entity-extractor-entry"><a style="cursor: pointer;" onclick="toggleType(this);">Extractor</a></li>
+                    </ul>
+                  </div>
+                </div>
+              </h3>
+            </div>
+            <div id="type-body" class="panel-body" style="font-size: 12px; height: inherit; padding-bottom: 90px; padding-top: 5px;">
+              <div class="input-group">
+                <input onkeydown="if(event.keyCode == 13) searchEntity();" id="entity-searcher" type="text" class="form-control" placeholder="Search for entity types...">
+                <span class="input-group-btn">
+                  <button class="btn btn-default" type="button" onclick="searchEntity();">Search</button>
+                </span>
+              </div>
+              <div id="entities" style="margin-top: 5px; height: inherit; overflow-y: auto; padding-right: 15px;">
+              </div>
+            </div>
+            <div id="entity-body" class="panel-body hidden">
+              <label>Search for a freebase entity:</label>
+              <input id="entity-search" style="background-color: #dff0d8; border-color: #d6e9c6; font-size: 16px; text-align: center;" onkeydown="if(event.keyCode == 13) searchFreebaseEntity();" type="text" class="form-control" placeholder="Entity">
+              <div id="entity-results" style="margin-top: 5px; height: inherit; overflow-y: auto; padding-right: 15px;"></div>
+            </div>
+            <div id="entity-extractor-body" style="height: inherit; padding-bottom: 205px;" class="panel-body hidden">
+              <div class="alert alert-success" id="selected-entity-extractor" style="padding: 5px;">
+                <label style="color: #333;">Currently selected:</label><br><p class="text-center lead"><b>Nothing</b><p class="text-center" style="font-size: 11px; margin-top: -5px;">&nbsp;</p></p>
+              </div>
+              <label>Search for an extractor:</label>
+              <input id="entity-extractor-search" style="/* background-color: #dff0d8; border-color: #d6e9c6; */ font-size: 16px; text-align: center;" onkeydown="if(event.keyCode == 13) searchEntityExtractor();" type="text" class="form-control" placeholder="Extractor">
+              <div style="margin-top: 5px; height: inherit; overflow-y: auto; padding-right: 15px; height: 100%;">
+                <div class="panel-group" id="entity-extractor-results"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-7" style="height:100%;">
+          <div class="panel panel-default" style="height:100%; overflow-y: hidden;">
+            <div class="panel-heading">
+              <div class="loader hidden" style="float: right;">
+                <img src="pattern-loader.gif">
+              </div>
+              <h3 class="panel-title">Patterns</h3>
+            </div>
+            <div class="panel-body" style="height: inherit; padding-bottom: 80px; padding-top: 5px;">
+              <div class="input-group">
+                <input onkeydown="if(event.keyCode == 13) searchPattern();" id="pattern-searcher" type="text" class="form-control" placeholder="Search for patterns...">
+                <span class="input-group-btn">
+                  <button class="btn btn-default" type="button" onclick="searchPattern();">Search</button>
+                </span>
+              </div>
+              <div id="patterns" style="margin-top: 5px; height: inherit; overflow-y: auto; padding-right: 15px;">
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:2%"></div>
+
+      <div class="panel panel-primary" style="height:45%; overflow-y: hidden;">
+        <div class="panel-heading">
+          <div class="loader hidden" style="float: right;">
+            <img src="output-loader.gif">
+          </div>
+          <h3 class="panel-title">Output</h3>
+        </div>
+        <div class="panel-body" style="height: 100%; margin-top: -80px; padding-top: 80px;">
+          <div style="overflow-y: auto; height: inherit; padding-right: 15px;">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Entity</th>
+                  <th>Example</th>
+                  <th style="width: 30px"><span class="glyphicon glyphicon-info-sign"></span></th>
+                </tr>
+              </thead>
+              <tbody id="results">
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel-footer">
+          <div style="float: left;">
+            <a href="#" onclick="permaLink();" class="download"><span class="glyphicon glyphicon-link"></span>&nbsp;Permalink</a>
+          </div>
+          <div class="text-right">
+            <a href="#" onclick="download_result();" class="download"><span class="glyphicon glyphicon-download"></span>&nbsp;Download this result</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="info-box" style="position: absolute; left: 50%; z-index: 100000; top: 80%; display: none;">
+    <div class="alert alert-warning" style="position: relative; left: -50%;">
+      <span class="glyphicon glyphicon-exclamation-sign"></span> <span id="info-content"></span>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="output-info" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Info</h4>
+        </div>
+        <div class="modal-body" id="output-info-body">
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="save-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Save</h4>
+        </div>
+        <div class="modal-body">
+          <p>Saving the current extractor makes the entities of the result set usable in other extractors. Please choose an appropriate name and description for your extractor:</p>
+          <label for="save-name">Name:</label>
+          <input type="text" id="save-name" placeholder="Name" class="form-control"/>
+          <br/>
+          <label>Name the entities and the relation of your extractor:</label>
+          <input type="text" id="save-typesname" placeholder="Name for entities" class="form-control" style="margin-bottom: 3px;"/>
+          <input type="text" id="save-relation" placeholder="Name for relation" class="form-control"/>
+          <br/>
+          <label for="save-description">Description:</label>
+          <input type="text" id="save-description" placeholder="Description" class="form-control"/>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success" data-dismiss="modal" onclick="saveExtractor();">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</body>
+</html>

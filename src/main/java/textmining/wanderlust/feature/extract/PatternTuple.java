@@ -11,7 +11,7 @@ import java.util.Map;
  * This is used to mediate between feature extraction methods and pig functions. Fields will
  * typically be filled with datapoint-feature tuples plus extra information.
  * Earlier classes had explicit fields but for easier experimentation it was converted to a map.
- *
+ * <p/>
  * Created by alan on 12/7/13.
  */
 public class PatternTuple {
@@ -19,6 +19,9 @@ public class PatternTuple {
     private Entity subject = null;
     private Entity object = null;
     private String pattern = null;
+
+
+    private String origin = null;
 
     public String getSignature() {
         return signature;
@@ -56,6 +59,14 @@ public class PatternTuple {
 
     public String get(int i) {
         return internalMap.get(i);
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
     }
 
     @Override
