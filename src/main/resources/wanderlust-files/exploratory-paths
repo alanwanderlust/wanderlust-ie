@@ -1,0 +1,28 @@
+x V y
+x V y N
+x V y N I N
+x V y P N
+x V I y
+x V I N I y
+x V I N y
+x V N I y
+x V N I y N
+x V N I N y
+x V J I y
+x N y
+x N I y
+x N I N I y
+x P N y
+x P y
+x C y P N
+x C y V
+x , y P N
+x - y P N
+x W y V
+N I x N I y
+N I x C y
+V I x y N
+V I x y
+V I x N y
+V I x C y
+V x N I y
