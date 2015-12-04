@@ -28,36 +28,55 @@
             <version>0.9.1</version>
         </dependency>
 
-
+        <!-- new ClearNLP Parser -->
         <dependency>
-            <groupId>com.clearnlp</groupId>
+            <groupId>edu.emory.clir</groupId>
             <artifactId>clearnlp</artifactId>
-            <version>2.0.2</version>
+            <version>3.2.0</version>
         </dependency>
 
         <dependency>
-            <groupId>com.clearnlp</groupId>
+            <groupId>edu.emory.clir</groupId>
             <artifactId>clearnlp-dictionary</artifactId>
-            <version>1.0</version>
+            <version>3.2</version>
         </dependency>
 
         <dependency>
-            <groupId>com.clearnlp</groupId>
-            <artifactId>clearnlp-general-en-dep</artifactId>
-            <version>1.2</version>
+            <groupId>edu.emory.clir</groupId>
+            <artifactId>clearnlp-global-lexica</artifactId>
+            <version>3.1</version>
         </dependency>
 
         <dependency>
-            <groupId>com.clearnlp</groupId>
+            <groupId>edu.emory.clir</groupId>
             <artifactId>clearnlp-general-en-pos</artifactId>
-            <version>1.1</version>
+            <version>3.2</version>
         </dependency>
 
         <dependency>
-            <groupId>com.clearnlp</groupId>
-            <artifactId>clearnlp-general-en-srl</artifactId>
-            <version>1.1</version>
+            <groupId>edu.emory.clir</groupId>
+            <artifactId>clearnlp-general-en-ner</artifactId>
+            <version>3.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>edu.emory.clir</groupId>
+            <artifactId>clearnlp-general-en-ner-gazetteer</artifactId>
+            <version>3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.emory.clir</groupId>
+            <artifactId>clearnlp-general-en-dep</artifactId>
+            <version>3.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.emory.clir</groupId>
+            <artifactId>clearnlp-general-en-srl</artifactId>
+            <version>3.0</version>
+        </dependency>
+
 
         <dependency>
             <groupId>commons-logging</groupId>
@@ -72,7 +91,7 @@
         </dependency>
 
 
-
+        <!-- hadoop stuff -->
         <dependency>
             <groupId>org.apache.pig</groupId>
             <artifactId>pig</artifactId>
@@ -92,7 +111,7 @@
             <version>2.7.0</version>
         </dependency>
 
-        <!-- all of this for parquet -->
+        <!-- this for parquet -->
         <dependency>
             <groupId>com.twitter</groupId>
             <artifactId>parquet-pig</artifactId>
@@ -100,6 +119,7 @@
         </dependency>
 
 
+        <!-- dependencies for the Web UI -->
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>
@@ -124,6 +144,7 @@
             <artifactId>lucene-core</artifactId>
             <version>4.10.2</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-analyzers-common</artifactId>

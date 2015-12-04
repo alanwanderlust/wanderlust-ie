@@ -1,15 +1,15 @@
 package textmining.wanderlust.nlp.domain;
 
-import com.clearnlp.component.AbstractComponent;
-import com.clearnlp.dependency.DEPNode;
-import com.clearnlp.dependency.DEPTree;
-import com.clearnlp.nlp.NLPGetter;
-import com.clearnlp.nlp.NLPMode;
-import com.clearnlp.reader.AbstractReader;
-import com.clearnlp.segmentation.AbstractSegmenter;
-import com.clearnlp.tokenization.AbstractTokenizer;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import edu.emory.clir.clearnlp.component.AbstractComponent;
+import edu.emory.clir.clearnlp.component.mode.dep.DEPConfiguration;
+import edu.emory.clir.clearnlp.component.mode.srl.SRLConfiguration;
+import edu.emory.clir.clearnlp.component.utils.GlobalLexica;
+import edu.emory.clir.clearnlp.component.utils.NLPUtils;
+import edu.emory.clir.clearnlp.dependency.DEPTree;
+import edu.emory.clir.clearnlp.tokenization.AbstractTokenizer;
+import edu.emory.clir.clearnlp.util.lang.TLanguage;
 import textmining.wanderlust.feature.extract.BinaryPatternExtractor;
 import textmining.wanderlust.feature.extract.EntityFinderUtility;
 import textmining.wanderlust.feature.extract.ExtractorType;
@@ -26,56 +26,73 @@ import java.util.Map;
  */
 public class ClearNLPParser {
 
-    final String language = AbstractReader.LANG_EN;
+    final TLanguage language = TLanguage.ENGLISH;
 
-    AbstractTokenizer tokenizer = NLPGetter.getTokenizer(language);
-    AbstractComponent tagger;
-    AbstractComponent parser;
-    AbstractComponent identifier;
-    AbstractComponent classifier;
-    AbstractComponent labeler;
+    private AbstractComponent[] components;
+    private AbstractTokenizer tokenizer;
 
 
     public ClearNLPParser() throws IOException {
 
-        tagger = NLPGetter.getComponent("general-en", language, NLPMode.MODE_POS);
-        parser = NLPGetter.getComponent("general-en", language, NLPMode.MODE_DEP);
-      //  identifier = NLPGetter.getComponent("general-en", language, NLPMode.MODE_PRED);
-      //  classifier = NLPGetter.getComponent("general-en", language, NLPMode.MODE_ROLE);
-      //  labeler = NLPGetter.getComponent("general-en", language, NLPMode.MODE_SRL);
+        tokenizer = NLPUtils.getTokenizer(language);
+        components = getGeneralModels(language);
 
     }
 
 
-    public DependencyParse parse(String sentence) {
-        DEPTree tree = NLPGetter.toDEPTree(tokenizer.getTokens(sentence));
-        List<AbstractComponent> components = Lists.newArrayList(tagger, parser);
+    private AbstractComponent[] getGeneralModels(TLanguage language) {
+        // initialize global lexicons
+        List<String> paths = Lists.newArrayList();
+        paths.add("brown-rcv1.clean.tokenized-CoNLL03.txt-c1000-freq1.txt.xz");
 
-        for (AbstractComponent component : components)
+        GlobalLexica.initDistributionalSemanticsWords(paths);
+
+        // initialize statistical models
+        AbstractComponent morph = NLPUtils.getMPAnalyzer(language);
+        AbstractComponent pos = NLPUtils.getPOSTagger(language, "general-en-pos.xz");
+        AbstractComponent dep = NLPUtils.getDEPParser(language, "general-en-dep.xz", new DEPConfiguration("root"));
+        AbstractComponent srl = NLPUtils.getSRLabeler(language, "general-en-srl.xz", new SRLConfiguration(4, 3));
+
+        GlobalLexica.initNamedEntityDictionary("general-en-ner-gazetteer.xz");
+        AbstractComponent ner = NLPUtils.getNERecognizer(language, "general-en-ner.xz");
+
+        return new AbstractComponent[]{pos, morph, dep, ner};
+    }
+
+    private DEPTree toDEPTree(String line) {
+        List<String> tokens = tokenizer.tokenize(line);
+        edu.emory.clir.clearnlp.dependency.DEPTree tree = new edu.emory.clir.clearnlp.dependency.DEPTree(tokens);
+
+        for (edu.emory.clir.clearnlp.component.AbstractComponent component : components)
             component.process(tree);
 
+        return tree;
+    }
+
+    public DependencyParse parse(String sentence) {
+        edu.emory.clir.clearnlp.dependency.DEPTree tree = toDEPTree(sentence);
 
         Map<Integer, DepWord> idWordMap = Maps.newHashMap();
         List<DepWord> words = Lists.newArrayList();
 
-        for (DEPNode depNode : tree) {
+        for (edu.emory.clir.clearnlp.dependency.DEPNode depNode : tree) {
             if (depNode.getLabel() == null) continue;
-            DepWord word = new DepWord(depNode.id, depNode.form, depNode.pos, DepWord.NULL_NER_TYPE, depNode.lemma);
-            idWordMap.put(depNode.id, word);
+            DepWord word = new DepWord(depNode.getID(), depNode.getWordForm(), depNode.getPOSTag(), depNode.getNamedEntityTag(), depNode.getLemma());
+            idWordMap.put(depNode.getID(), word);
             words.add(word);
         }
 
-        for (DEPNode depNode : tree) {
+        for (edu.emory.clir.clearnlp.dependency.DEPNode depNode : tree) {
 
             if (depNode.getLabel() == null) continue;
 
 
-            DepWord to = idWordMap.get(depNode.id);
-            DepWord from = idWordMap.get(depNode.getHeadArc().getNode().id);
+            DepWord to = idWordMap.get(depNode.getID());
+
+
+            DepWord from = idWordMap.get(depNode.getHead().getID());
             if (from == null) continue;
-
-
-            DepLink link = new DepLink(from, depNode.getHeadArc().getLabel(), to);
+            DepLink link = new DepLink(from, depNode.getLabel(), to);
 
             from.getOutgoingLinks().add(link);
             to.getIncomingLinks().add(link);
@@ -83,40 +100,24 @@ public class ClearNLPParser {
         }
 
         DependencyParse parse = new DependencyParse(words);
-
         return parse;
     }
 
-    public void process(AbstractTokenizer tokenizer, AbstractComponent[] components, BufferedReader reader, PrintStream fout) {
-        AbstractSegmenter segmenter = NLPGetter.getSegmenter(language, tokenizer);
-        DEPTree tree;
-
-        for (List<String> tokens : segmenter.getSentences(reader)) {
-            tree = NLPGetter.toDEPTree(tokens);
-
-            for (AbstractComponent component : components)
-                component.process(tree);
-
-            fout.println(tree.toStringSRL() + "\n");
-        }
-
-        fout.close();
-    }
 
     public static void main(String[] args) {
 
         try {
 
             ClearNLPParser parser = new ClearNLPParser();
-            DependencyParse parse = parser.parse("As far as I know , Russians would much prefer to hate Chinese than to hate the Europeans .");
+            DependencyParse parse = parser.parse("Albert Einstein was born in Berlin.");
             System.out.println(parse.toJson());
 
             List<Entity> entities = Lists.newArrayList();
-            entities.add(EntityFinderUtility.locateEntityInParse(parse, new Entity("Chinese", "id1")));
-            entities.add(EntityFinderUtility.locateEntityInParse(parse, new Entity("Europeans", "id1")));
+            entities.add(EntityFinderUtility.locateEntityInParse(parse, new Entity("Albert Einstein", "id1")));
+            entities.add(EntityFinderUtility.locateEntityInParse(parse, new Entity("Berlin", "id1")));
 
             // determine entity pairs in the sentence - the strategy depends on the entityType that is passed here
-       //     List<Entity> entities = EntityFinderUtility.findEntitiesFrom(parse, entityType);
+            //     List<Entity> entities = EntityFinderUtility.findEntitiesFrom(parse, entityType);
 
             BinaryPatternExtractor b = new BinaryPatternExtractor(ExtractorType.EXPLORATORY_IE);
 
@@ -126,8 +127,8 @@ public class ClearNLPParser {
 
             for (PatternTuple patternTuple : extract) {
                 System.out.println("patternTuple.get(3) = " + patternTuple);
-                System.out.println("patternTuple.get(3) = " + patternTuple.get(1));
-                foundPattern.add(patternTuple.get(1));
+                System.out.println("patternTuple.get(3) = " + patternTuple);
+
                 //      }
             }
 

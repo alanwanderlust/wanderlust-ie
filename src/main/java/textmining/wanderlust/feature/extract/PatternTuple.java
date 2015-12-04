@@ -17,9 +17,10 @@ import java.util.Map;
 public class PatternTuple {
 
     private Entity subject = null;
-    private Entity object = null;
-    private String pattern = null;
 
+    private Entity object = null;
+
+    private String pattern = null;
 
     private String origin = null;
 
@@ -49,16 +50,6 @@ public class PatternTuple {
 
     public String getPattern() {
         return pattern;
-    }
-
-    Map<Integer, String> internalMap = Maps.newHashMap();
-
-    public void set(int i, String s) {
-        internalMap.put(i, s);
-    }
-
-    public String get(int i) {
-        return internalMap.get(i);
     }
 
     public String getOrigin() {
