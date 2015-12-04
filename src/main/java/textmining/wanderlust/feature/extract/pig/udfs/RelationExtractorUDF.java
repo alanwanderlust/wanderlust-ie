@@ -85,49 +85,6 @@ public class RelationExtractorUDF extends EvalFunc<DataBag> {
 
             return bag;
 
-        }
-
-        // in this case, no types and ids are passed
-        else if (input.size() == 7) {
-
-            String sentence = input.get(0).toString();
-
-            String parse = input.get(1).toString();
-            if (parse.startsWith("(")) {
-                parse = parse.substring(1, parse.length() - 1);
-            }
-
-            String entity1Text = input.get(2).toString();
-            String entity2Text = input.get(3).toString();
-      /*      String wikiId1 = input.get(4).toString();
-            String wikiId2 = input.get(5).toString();
-            String relation = input.get(6).toString();*/
-
-        //    System.out.println("parse = " + parse);
-
-
-            Entity entity1;
-            Entity entity2;
-            List<PatternTuple> patternTuples;
-            DependencyParse dependencyParse = DependencyParse.parseJson(parse);
-            entity1 = EntityFinderUtility.locateEntityInParse(dependencyParse, entity1Text);
-            entity2 = EntityFinderUtility.locateEntityInParse(dependencyParse, entity2Text);
-
-            patternTuples = extractor.extract(dependencyParse, Lists.newArrayList(entity1, entity2));
-
-            DataBag bag = bagFactory.newDefaultBag();
-            for (PatternTuple patternTuple : patternTuples) {
-                Tuple tuple = tupleFactory.newTuple(5);
-                tuple.set(0, patternTuple.get(0));
-                tuple.set(1, patternTuple.get(1));
-                tuple.set(2, patternTuple.get(2));
-                tuple.set(3, patternTuple.get(3));
-                tuple.set(4, sentence);
-                bag.add(tuple);
-            }
-
-            return bag;
-
         } else return null;
     }
 
