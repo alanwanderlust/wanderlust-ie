@@ -117,6 +117,11 @@
             <artifactId>parquet-pig</artifactId>
             <version>1.6.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.parquet</groupId>
+            <artifactId>parquet-avro</artifactId>
+            <version>1.8.1</version>
+        </dependency>
 
 
         <!-- dependencies for the Web UI -->
